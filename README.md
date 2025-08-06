@@ -1,0 +1,2 @@
+# ETL-Automation-Testing-with-PySpark---Cryptocurrency-Data-Pipeline
+This project demonstrates ETL Quality Engineering skills through automated testing of a cryptocurrency data pipeline using PySpark, Python, and SQL. The pipeline processes real-time crypto market data, validates data quality, and performs comprehensive automated testing - perfectly aligned with modern ETL automation requirements.
