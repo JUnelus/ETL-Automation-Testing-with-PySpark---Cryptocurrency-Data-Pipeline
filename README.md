@@ -1,285 +1,156 @@
-# ETL Automation Testing with PySpark - Cryptocurrency Data Pipeline
+# Cryptocurrency ETL Quality Engineering Pipeline
 
-## 🚀 Project Overview
+## Executive Summary
 
-**Production-grade ETL pipeline with comprehensive data quality validation** demonstrating advanced ETL Quality Engineering skills. Processes live cryptocurrency market data through multi-stage quality gates ensuring **100% data quality scores** in production environments.
+This repository presents a production-style ETL framework for cryptocurrency market data, designed with explicit quality controls at each stage of the data lifecycle. The solution demonstrates how to combine ingestion, transformation, validation, and reporting into an auditable workflow suitable for analytics operations.
 
-**🔴 LIVE DEMO RESULTS**: *Raw Data Quality: 100.0% | Processed Data Quality: 100.0% | Execution Time: 0.05s*
+From a leadership perspective, the focus is not only on data movement, but on data trust: quality gates, business-rule enforcement, and automated testing are embedded into pipeline execution so that poor-quality records are detected early and prevented from entering downstream reporting.
 
-### ✅ **Must-Have Skills:**
-- **Python** - Advanced data processing, API integration, object-oriented design
-- **Data Quality Validation** - 4-layer validation framework (Completeness, Accuracy, Consistency, Uniqueness)
-- **ETL Pipeline Development** - Multi-stage processing with quality gates
-- **Automated Testing** - Comprehensive test suite with 95%+ coverage
-- **API Integration** - REST API automation with error handling and retry logic
-- **Multiple Data Formats** - CSV, Parquet, JSON processing and optimization
+## Strategic Objectives
 
-### 🏆 **Advanced Capabilities:**
-- **Quality Gate Implementation** - Threshold-based validation with production standards
-- **Business Rule Validation** - Custom validation logic for financial data
-- **Performance Optimization** - Sub-second processing with comprehensive monitoring
-- **Audit Trail Management** - Complete quality reporting and metadata tracking
-- **Production Monitoring** - Real-time quality scoring and alerting
+- Deliver a repeatable ETL workflow that can be operated and tested consistently.
+- Enforce measurable quality standards before and after transformation.
+- Provide transparent audit artifacts for governance and troubleshooting.
+- Support multiple output formats (`parquet`, `csv`, `json`) for broad compatibility.
+- Maintain a test-first implementation with strong automated validation.
 
-## 📋 Architecture & Design
+## Architecture
 
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   CoinGecko     │───▶│ Quality Gate 1   │───▶│   Raw Storage   │
-│      API        │    │ (90% threshold)  │    │   + Metadata    │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                                ▼
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ Quality Reports │◀───│  ETL Processing  │───▶│ Quality Gate 2  │
-│   & Monitoring  │    │   & Transform    │    │ (95% threshold) │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                    ┌──────────────────┐
-                    │ Production Data  │
-                    │  Lake Storage    │
-                    └──────────────────┘
+```text
+CoinGecko API
+   |
+   v
+Ingestion Layer -> Quality Gate 1 (Raw Data) -> Raw Storage
+   |
+   v
+Transformation Layer -> Quality Gate 2 (Processed Data)
+   |
+   +--> Processed Outputs (Parquet/CSV/JSON)
+   +--> Quality Reports and Execution Metadata
 ```
 
-## 🔍 Data Quality Framework
+## Data Quality Model
 
-### **Multi-Layer Validation Engine:**
+The `DataQualityValidator` applies a four-domain framework:
 
-#### 1. **Completeness Validation**
-- Configurable thresholds (90% raw, 95% processed)
-- Critical column identification  
-- Missing value detection and reporting
+1. Completeness
+   - Verifies critical fields and threshold compliance.
+2. Accuracy
+   - Enforces business constraints (for example, positive prices, reasonable volume behavior).
+3. Consistency
+   - Validates formatting and standardization rules.
+4. Uniqueness
+   - Identifies duplicate keys and integrity violations.
 
-#### 2. **Accuracy Validation**  
-- Business rule engine for financial data
-- Positive price validation
-- Market cap boundary checks
-- Volume ratio validation
+Quality gates are configurable by stage (raw vs. processed), enabling stricter control as data approaches publication.
 
-#### 3. **Consistency Validation**
-- Data format standardization
-- Symbol case validation  
-- ID format compliance
+## Core Components
 
-#### 4. **Uniqueness Validation**
-- Primary key constraint checking
-- Duplicate detection with samples
-- Data integrity verification
+### `src/data_ingestion/`
+- `api_client.py`: resilient API client with retry/error-handling behavior.
+- `data_fetcher.py`: ingestion orchestration and persistence of raw snapshots.
 
-## 📊 Performance Metrics
+### `src/etl_pipeline/`
+- `pandas_pipeline.py`: no-Java ETL path for broad local compatibility.
+- `pipeline_runner.py` and related PySpark modules: distributed ETL execution path.
+- `integrated_pipeline.py`: orchestrates ETL with integrated quality gates.
 
-### **Production Results:**
-- ⚡ **Execution Time**: 0.05 seconds for complete pipeline
-- 🎯 **Quality Score**: 100% (both raw and processed data)  
-- 📈 **Throughput**: 200+ records/second processing capacity
-- ✅ **Reliability**: 100% quality gate success rate
-- 🔒 **Data Integrity**: Zero data loss, complete audit trail
+### `src/data_quality/`
+- `quality_validator.py`: quality scoring, validation results, and report generation.
 
-### **Quality Gate Performance:**
-```
-STAGE 1: Raw Data Validation     ✅ PASSED (100.0%)
-STAGE 2: ETL Processing          ✅ COMPLETED  
-STAGE 3: Processed Validation    ✅ PASSED (100.0%)
-STAGE 4: Aggregation Checks      ✅ PASSED
-STAGE 5: Data Persistence        ✅ COMPLETED
-```
+### `src/utils/`
+- environment/session utilities (including Spark session configuration for local execution).
 
-## 🛠️ Implementation Details
+## Engineering Capabilities Demonstrated
 
-### **Technology Stack:**
-- **Core**: Python 3.11+, Pandas, NumPy
-- **Data Processing**: Advanced transformations, financial calculations
-- **Quality Framework**: Custom validation engine with business rules
-- **Testing**: PyTest with 95%+ coverage, automated quality regression tests
-- **Data Formats**: Parquet (optimized), CSV, JSON with compression
-- **API Integration**: RESTful services with retry logic and rate limiting
+- Multi-stage ETL orchestration with formal pass/fail quality controls.
+- Rule-based data quality scoring with actionable outputs.
+- Automated persistence of quality reports for auditability.
+- Structured error handling and execution metadata for observability.
+- Support for both Pandas-based and PySpark-based execution modes.
 
-### **Key Components:**
+## Testing and Quality Assurance
 
-#### **1. Data Ingestion (`src/data_ingestion/`)**
-```python
-# Professional API client with comprehensive error handling
-class CryptoAPIClient:
-    - Rate limiting and retry logic
-    - Multiple data format support  
-    - Quality validation on ingestion
-    - Comprehensive error handling
-```
+The project includes unit, integration, and end-to-end execution tests across ingestion, quality validation, and ETL orchestration.
 
-#### **2. ETL Pipeline (`src/etl_pipeline/`)**  
-```python
-# Production ETL with integrated quality gates
-class QualityEnhancedETLPipeline:
-    - Multi-stage quality validation
-    - Business rule engine
-    - Performance optimization
-    - Audit trail generation
-```
+Representative command:
 
-#### **3. Quality Framework (`src/data_quality/`)**
-```python
-# Comprehensive data quality validation
-class DataQualityValidator:
-    - 4-layer validation framework
-    - Configurable business rules
-    - Quality scoring algorithms
-    - Detailed reporting engine
-```
-
-## 🧪 Automated Testing Suite
-
-### **Test Coverage: 95%+**
 ```bash
-pytest tests/ -v --cov=src --cov-report=html
-===============================================================================
-tests/test_data_quality.py::TestDataQualityValidator::test_completeness_validation_pass PASSED [ 12%]
-tests/test_data_quality.py::TestDataQualityValidator::test_accuracy_validation_business_rules PASSED [ 37%]
-tests/test_data_quality.py::TestDataQualityValidator::test_consistency_validation PASSED [ 50%]
-tests/test_data_quality.py::TestDataQualityValidator::test_uniqueness_validation PASSED [ 62%]
-tests/test_data_quality.py::TestDataQualityValidator::test_comprehensive_quality_report PASSED [ 75%]
-===============================================================================
-8 passed in 0.51s
+pytest -v --cov=src --cov-report=html
 ```
 
-### **Test Categories:**
-- ✅ **Unit Tests** - Individual component validation
-- ✅ **Integration Tests** - End-to-end pipeline testing  
-- ✅ **Quality Tests** - Business rule validation
-- ✅ **Performance Tests** - Load and stress testing
-- ✅ **Regression Tests** - Quality threshold monitoring
+Recent local validation in this workspace completed successfully with all collected tests passing.
 
-## 🚀 Quick Start
+## Quick Start
 
-### **Prerequisites:**
+### Prerequisites
+
+- Python 3.11+ recommended
+- Dependencies from `requirements.txt`
+- Optional: Java runtime for the full PySpark path
+
+### Setup
+
 ```bash
-Python 3.8+, pandas, pyarrow, requests, pytest
-```
-
-### **Installation & Execution:**
-```bash
-# Clone repository
-git clone https://github.com/JUnelus/ETL-Automation-Testing-with-PySpark---Cryptocurrency-Data-Pipeline.git
-cd crypto-etl-automation
-
-# Setup environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+```
 
-# Run complete pipeline with quality validation
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### Run Key Workflows
+
+```bash
 python test_integrated_pipeline.py
-
-# Execute automated test suite  
-pytest tests/ -v --cov=src --cov-report=html
-
-# Generate quality framework demo
 python test_quality_framework.py
+pytest -q
 ```
 
-## 📈 Sample Output
+## Operational Outputs
 
-### **Quality-Enhanced ETL Execution:**
-```
-🏆 QUALITY-ENHANCED ETL PIPELINE RESULTS
-================================================================================
+Pipeline runs generate:
 
-📊 EXECUTION SUMMARY:
-  Status: SUCCESS
-  Execution Time: 0.05 seconds
-  Records Processed: 10
+- Raw data snapshots
+- Processed datasets (`parquet`, `csv`, `json`)
+- Raw and processed quality reports (JSON)
+- Execution metadata and quality scores
 
-🔍 QUALITY ASSESSMENT:
-  Raw Data Quality: 100.0%
-  Processed Data Quality: 100.0%  
-  Quality Gates Passed: 2/2
-  Overall Quality Status: EXCELLENT
+Primary output locations:
 
-🏆 TOP 3 PERFORMERS (24H):
-  1. Dogecoin (DOGE): $0.21 (+2.74%)
-  2. Solana (SOL): $168.18 (+2.50%)
-  3. Lido Staked Ether (STETH): $3,674.50 (+1.81%)
+- `data/raw/`
+- `data/processed/`
+- `data/quality_reports/`
 
-📁 OUTPUT FILES: 5 files generated with quality metadata
-```
+## Business Impact
 
-## 📊 Business Value & Impact
+This implementation aligns with practical ETL quality engineering goals:
 
-### **Production Readiness:**
-- **Quality Assurance**: Multi-gate validation preventing bad data in production
-- **Performance**: Sub-second processing with comprehensive monitoring
-- **Reliability**: 100% success rate with complete error handling
-- **Scalability**: Designed for enterprise-scale data processing  
-- **Maintainability**: Professional code structure with comprehensive testing
+- Risk reduction: quality gates reduce propagation of invalid records.
+- Reliability: repeatable execution with automated verification.
+- Governance: auditable reports and traceable run artifacts.
+- Maintainability: modular design with focused test coverage.
 
-### **ETL Quality Engineering Alignment:**
-- ✅ **Data Pipeline Validation** - Multi-stage quality gates
-- ✅ **ETL Automation Testing** - Comprehensive test automation  
-- ✅ **Business Rule Implementation** - Custom validation engine
-- ✅ **Quality Monitoring** - Real-time scoring and reporting
-- ✅ **Production Standards** - Enterprise-grade error handling
+## Repository Structure
 
-## 📁 Project Structure
-
-```
-crypto-etl-automation/
-├── src/
-│   ├── data_ingestion/          # API clients and data fetching
-│   │   ├── api_client.py        # Professional API integration
-│   │   └── data_fetcher.py      # Batch processing orchestrator
-│   ├── etl_pipeline/            # ETL processing engine  
-│   │   ├── pandas_pipeline.py   # Core ETL transformations
-│   │   └── integrated_pipeline.py # Quality-enhanced pipeline
-│   ├── data_quality/            # Quality validation framework
-│   │   └── quality_validator.py # Multi-layer validation engine
-│   └── utils/                   # Shared utilities
-├── tests/                       # Comprehensive test suite
-│   ├── test_data_quality.py     # Quality framework tests
-│   └── conftest.py              # Test configuration
-├── data/                        # Data lake structure
-│   ├── raw/                     # Ingested data with metadata
-│   ├── processed/               # Quality-validated outputs  
-│   └── quality_reports/         # Quality audit trails
-└── requirements.txt             # Production dependencies
+```text
+src/
+  data_ingestion/
+  data_quality/
+  etl_pipeline/
+  utils/
+tests/
+data/
+requirements.txt
+README.md
 ```
 
-## 🔗 Key Features for ETL Quality Engineering
+## Repository
 
-### **1. Quality Gate Implementation**
-- Configurable thresholds for different data stages
-- Automatic pipeline stopping on quality failures
-- Detailed quality scoring with recommendations
-
-### **2. Business Rule Engine**
-- Financial data validation (positive prices, reasonable ratios)
-- Custom rule definition and execution
-- Rule failure tracking and reporting
-
-### **3. Comprehensive Audit Trail**  
-- Quality metadata enrichment in output data
-- Timestamped quality reports for compliance
-- Complete pipeline execution logging
-
-### **4. Production Monitoring**
-- Real-time quality scoring and alerting  
-- Performance metrics and optimization
-- Error handling with graceful degradation
-
-## 🎯 Interview Talking Points
-
-### **Technical Depth:**
-*"I implemented a 5-stage ETL pipeline with integrated quality gates that processes live cryptocurrency data. The system achieves 100% quality scores through comprehensive validation including completeness, accuracy, consistency, and uniqueness checks. It features configurable business rules, sub-second processing, and complete audit trails."*
-
-### **Quality Engineering Focus:**  
-*"The quality framework prevents bad data from reaching production through multi-layer validation. For example, it validates that all prices are positive, market caps are reasonable, and data formats are consistent. Quality gates stop processing if thresholds aren't met - like requiring 95% completeness for processed data."*
-
-### **Automation & Testing:**
-*"I built a comprehensive test suite with 95%+ coverage including unit tests for each validation component, integration tests for the complete pipeline, and regression tests for quality thresholds. The automated testing catches issues before deployment and validates business rule changes."*
-
----
-
-**🔗 Repository**: `https://github.com/JUnelus/ETL-Automation-Testing-with-PySpark---Cryptocurrency-Data-Pipeline`  
-**📊 Live Demo**: Available - run `python test_integrated_pipeline.py`  
-**📧 Contact**: Ready to discuss how this demonstrates production ETL quality engineering expertise!
-
----
+`https://github.com/JUnelus/ETL-Automation-Testing-with-PySpark---Cryptocurrency-Data-Pipeline`

@@ -3,6 +3,8 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql.window import Window
 import logging
+import os
+from pathlib import Path
 from typing import List, Dict, Tuple
 
 
@@ -60,6 +62,13 @@ class CryptoDataTransformations:
         """
         self.logger.info("Starting data cleaning transformation")
 
+        available_columns = set(df.columns)
+
+        # Some API exports do not include 7d/30d price-change fields.
+        # Keep the schema stable by backfilling missing optional columns with nulls.
+        def optional_double_col(column_name: str):
+            return col(column_name).cast("double") if column_name in available_columns else lit(None).cast("double")
+
         # Define schema transformation with proper data types
         cleaned_df = df.select(
             col("id").alias("coin_id"),
@@ -69,17 +78,17 @@ class CryptoDataTransformations:
             col("market_cap").cast("bigint").alias("market_cap_usd"),
             col("market_cap_rank").cast("int").alias("market_rank"),
             col("total_volume").cast("bigint").alias("volume_24h_usd"),
-            col("price_change_percentage_24h").cast("double").alias("price_change_24h_pct"),
-            col("price_change_percentage_7d").cast("double").alias("price_change_7d_pct"),
-            col("price_change_percentage_30d").cast("double").alias("price_change_30d_pct"),
+            optional_double_col("price_change_percentage_24h").alias("price_change_24h_pct"),
+            optional_double_col("price_change_percentage_7d").alias("price_change_7d_pct"),
+            optional_double_col("price_change_percentage_30d").alias("price_change_30d_pct"),
             current_timestamp().alias("extraction_timestamp"),
             date_format(current_timestamp(), "yyyy-MM-dd").alias("extraction_date")
         ).filter(
             # Data quality filters
-            col("price_usd").isNotNull() &
-            col("market_cap_usd").isNotNull() &
-            col("price_usd") > 0 &
-            col("market_cap_usd") > 0
+            (col("price_usd").isNotNull()) &
+            (col("market_cap_usd").isNotNull()) &
+            (col("price_usd") > 0) &
+            (col("market_cap_usd") > 0)
         )
 
         # Standardize symbol to uppercase
@@ -248,5 +257,33 @@ class CryptoDataTransformations:
             self.logger.info(f"Successfully saved data to {output_path} as {format_type}")
 
         except Exception as e:
+            error_message = str(e)
+
+            # Windows without winutils can fail during Spark file commit for parquet/csv/json writes.
+            # Fallback to pandas writer keeps the pipeline usable for local development/tests.
+            if os.name == "nt" and ("winutils" in error_message.lower() or "nativeio" in error_message.lower()):
+                self.logger.warning(f"Spark write failed on Windows, using pandas fallback: {e}")
+                output_file = Path(output_path)
+                output_file.parent.mkdir(parents=True, exist_ok=True)
+                fallback_file = output_file
+
+                # Spark parquet writes use directories; avoid collisions by switching to a file path.
+                if output_file.exists() and output_file.is_dir():
+                    fallback_file = output_file.with_name(f"{output_file.stem}_pandas_fallback{output_file.suffix}")
+
+                pandas_df = df.toPandas()
+
+                if format_type.lower() == "parquet":
+                    pandas_df.to_parquet(fallback_file, index=False)
+                elif format_type.lower() == "csv":
+                    pandas_df.to_csv(fallback_file, index=False)
+                elif format_type.lower() == "json":
+                    pandas_df.to_json(fallback_file, orient="records", indent=2)
+                else:
+                    raise ValueError(f"Unsupported output format: {format_type}")
+
+                self.logger.info(f"Saved data via pandas fallback to {fallback_file}")
+                return
+
             self.logger.error(f"Failed to save data: {e}")
             raise

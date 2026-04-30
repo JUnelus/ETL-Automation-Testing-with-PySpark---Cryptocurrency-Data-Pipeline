@@ -205,3 +205,16 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project: generated data outputs (keep folder structure via .gitkeep)
+data/raw/*.csv
+data/raw/*.json
+data/raw/*.parquet
+data/processed/*.csv
+data/processed/*.json
+data/processed/*.parquet
+data/processed/*/
+data/quality_reports/*.json
+temp_spark_test/
+artifacts/
+

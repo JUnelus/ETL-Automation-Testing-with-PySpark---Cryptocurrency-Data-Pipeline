@@ -42,12 +42,13 @@ def test_data_ingestion():
 
         print("\n🎉 Data Ingestion Layer Setup Complete!")
         print(f"📁 Check the 'data/raw/' directory for saved files")
-
-        return True
+        assert len(market_data) > 0
+        assert validation['status'] == 'PASS'
+        assert results['records_fetched'] > 0
 
     except Exception as e:
         print(f"❌ Error during testing: {e}")
-        return False
+        raise AssertionError(f"Error during data ingestion test: {e}") from e
 
 
 if __name__ == "__main__":

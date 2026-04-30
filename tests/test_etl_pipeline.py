@@ -42,8 +42,6 @@ def test_etl_pipeline():
             assert results['status'] == 'SUCCESS'
             assert results['records_processed'] > 0
             assert len(results['output_files']) == 3
-
-            return True
         else:
             print(f"❌ Pipeline failed: {results['error']}")
             # For pytest compatibility

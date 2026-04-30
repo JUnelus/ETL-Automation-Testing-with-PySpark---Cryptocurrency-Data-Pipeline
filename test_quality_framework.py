@@ -69,14 +69,14 @@ def test_quality_framework():
 
         print(f"\n💾 Quality report saved to: {report_file}")
         print(f"\n🎉 Data Quality Framework Test Complete!")
-
-        return True
+        assert overall['overall_status'] == 'FAIL'
+        assert overall['quality_score_percentage'] == 0.0
 
     except Exception as e:
         print(f"❌ Error during quality framework testing: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise AssertionError(f"Error during quality framework testing: {e}") from e
 
 
 if __name__ == "__main__":

@@ -33,17 +33,17 @@ def test_pandas_etl_pipeline():
 
             print(f"\n🎉 Pandas ETL Pipeline Complete!")
             print(f"📁 Check the 'data/processed/' directory for output files")
-
-            return True
+            assert results['records_processed'] > 0
+            assert len(results['output_files']) == 3
         else:
             print(f"❌ Pipeline failed: {results['error']}")
-            return False
+            assert False, f"Pandas pipeline failed: {results['error']}"
 
     except Exception as e:
         print(f"❌ Error during pipeline testing: {e}")
         import traceback
         traceback.print_exc()
-        return False
+        raise AssertionError(f"Error during pandas pipeline testing: {e}") from e
 
 
 if __name__ == "__main__":

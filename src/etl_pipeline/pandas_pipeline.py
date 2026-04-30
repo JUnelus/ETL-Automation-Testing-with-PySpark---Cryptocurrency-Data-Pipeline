@@ -210,7 +210,7 @@ class PandasETLPipeline:
             if 'coin_symbol' in df.columns:
                 agg_dict['coin_symbol'] = lambda x: list(x)
 
-            summary_df = df.groupby(group_columns).agg(agg_dict).round(2)
+            summary_df = df.groupby(group_columns, observed=False).agg(agg_dict).round(2)
 
             # Flatten column names
             summary_df.columns = [
