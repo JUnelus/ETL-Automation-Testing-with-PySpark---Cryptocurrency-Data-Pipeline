@@ -66,7 +66,7 @@ Quality gates are configurable by stage (raw vs. processed), enabling stricter c
 - Multi-stage ETL orchestration with formal pass/fail quality controls.
 - Rule-based data quality scoring with actionable outputs.
 - Automated persistence of quality reports for auditability.
-- Structured error handling and execution metadata for observability.
+- Structured error handling and execution metadata for observability.git g
 - Support for both Pandas-based and PySpark-based execution modes.
 
 ![etl_automation_testing_pyspark_workflow.png](etl_automation_testing_pyspark_workflow.png)
