@@ -69,6 +69,8 @@ Quality gates are configurable by stage (raw vs. processed), enabling stricter c
 - Structured error handling and execution metadata for observability.
 - Support for both Pandas-based and PySpark-based execution modes.
 
+![etl_automation_testing_pyspark_workflow.png](etl_automation_testing_pyspark_workflow.png)
+
 ## Testing and Quality Assurance
 
 The project includes unit, integration, and end-to-end execution tests across ingestion, quality validation, and ETL orchestration.
